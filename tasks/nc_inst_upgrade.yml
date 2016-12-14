@@ -1,0 +1,67 @@
+---
+- name: "[NC-Upgrade] - Move the current nextcloud instance."
+  command: "mv {{ nextcloud_webroot }} {{ nextcloud_webroot }}_old"
+  args:
+    creates: "{{ nextcloud_webroot }}_old/version.php"
+
+- name: "[NC-Upgrade] - Copy the new version in {{nextcloud_webroot}}."
+  command: "mv /tmp/nextcloud {{ nextcloud_webroot }}"
+  args:
+    creates: "{{ nextcloud_webroot }}/version.php"
+
+- name: "[NC-Upgrade] - restore config.php in {{nextcloud_webroot}}/config."
+  command: "cp {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_config.php {{ nextcloud_webroot }}/config/config.php"
+  args:
+    creates: "{{ nextcloud_webroot }}/config/config.php"
+
+- block:
+  - name: "[NC-Upgrade] - restore data folder"
+    command: "cp {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_data/. {{nextcloud_data_dir}}/."
+  - name: "[NC] - Setting directory ownership & permissions for the data folder"
+    file:
+      path: "{{ nextcloud_data_dir }}"
+      mode: u=rwX,g=rX,o-rwx
+      recurse: yes
+      state: directory
+      owner: "{{ websrv_user }}"
+      group: "{{ websrv_group }}"
+  when: "'{{nextcloud_webroot}}' in '{{nextcloud_data_dir}}'"
+
+- include: tasks/nc_3rd-party-apps.yml
+  when: nextcloud_restore_3rdparty_apps
+
+- name: "[NC] - Set temporary permissions for command line installation."
+  file:
+    path: "{{ nextcloud_webroot }}"
+    state: directory
+    recurse: yes
+    owner: "{{ websrv_user }}"
+    group: "{{ websrv_group }}"
+- name: "[NC] - Ensure Nextcloud directories are 0750"
+  command: find {{ nextcloud_data_dir }} -type d -exec chmod -c 0750 {} \;
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+
+- name: "[NC] - Ensure Nextcloud files are 0640"
+  command: find {{ nextcloud_data_dir }} -type f -exec chmod -c 0640 {} \;
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+
+- name: "[NC] - Setting stronger directory ownership"
+  file:
+    path: "{{ nextcloud_webroot }}/{{ item }}/"
+    recurse: yes
+    owner: "{{ websrv_user }}"
+    group: "{{ websrv_group }}"
+    state: directory
+  with_items:
+    - apps
+    - assets
+    - config
+    - themes
+    - updater
+
+- name: "[NC] - Give back execution permission to occ"
+  file:
+    path: "{{ nextcloud_webroot }}/occ"
+    mode: 0750

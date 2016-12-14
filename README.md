@@ -37,7 +37,7 @@ nextcloud_channel: "releases"
 Defines the version channel you want to use for the upgrade.
 Available : releases | prereleases | daily | latest
 ```YAML
-nextcloud_version: 10.0.1
+nextcloud_version: 10.0.2
 ```
 Specify the version name for channels **releases**, **prereleases** and **daily**. (it may not be numbers at all)
 ```YAML
@@ -84,7 +84,10 @@ The Nextcloud instance's database name.
 nextcloud_db_admin: "ncadmin"
 ```
 The Nextcloud instance's database user's login
-
+```YAML
+nextcloud_db_pwd: false
+```
+**The Nextcloud instance's database user's password --required!!--**
 ### System configuration
 ```YAML
 websrv_user: "www-data"

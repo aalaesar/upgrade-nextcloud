@@ -1,0 +1,21 @@
+---
+- name: "[NC - 3rd party apps ] List apps in old instance."
+  command: find . -maxdepth 1 -mindepth 1 -type d
+  args:
+    chdir: "{{nextcloud_webroot}}_old/apps/"
+  changed_when: false
+  register: nc_apps_old
+
+- name: "[NC - 3rd party apps ] List apps in new instance."
+  command: find . -maxdepth 1 -mindepth 1 -type d
+  args:
+    chdir: "{{nextcloud_webroot}}/apps/"
+  changed_when: false
+  register: nc_apps_new
+
+- name: "[NC - 3rd party apps ] Restore the old apps in the new instance."
+  command: cp -r {{item}} {{nextcloud_webroot}}/apps/
+  args:
+    chdir: "{{nextcloud_webroot}}_old/apps/"
+  when: "'{{item}}' not in nc_apps_new.stdout_lines"
+  with_items: "{{nc_apps_old.stdout_lines}}"

@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  become: true
+  become_user: root
+  roles:
+   - role: install_nextcloud
+     nextcloud_db_backend: "pgsql"
