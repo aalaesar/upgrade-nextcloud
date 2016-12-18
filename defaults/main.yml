@@ -16,7 +16,8 @@ nextcloud_repository: "https://download.nextcloud.com/server"
 nextcloud_websrv: "apache2"
 nextcloud_webroot: "/opt/nextcloud"
 nextcloud_data_dir: "/var/ncdata"
-nextcloud_backup_dir: "/opt/nextcloud_bkp"
+nextcloud_backup_dir: "{{nextcloud_webroot}}_bkp"
+nextcloud_webroot_old: "{{nextcloud_webroot}}_old"
 
 # [DATABASE]
 # nextcloud_db_backend: "mysql"/"mariadb" | "pgsql"

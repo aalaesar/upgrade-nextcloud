@@ -3,16 +3,16 @@
   file:
     path: "{{ nextcloud_backup_dir }}"
     state: directory
-  
+
 - name: "[NC-Backup] - Backup Mysql/MariaDb database."
   command: >
     mysqldump --lock-tables
     -h {{nextcloud_db_host}}
     -u {{nextcloud_db_admin}}
     -p{{nextcloud_db_pwd}}
-    {{nextcloud_db_name}} -r {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_nextcloud-bkp.sql
+    {{nextcloud_db_name}} -r {{nextcloud_backup_db}}
   args:
-    creates: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_nextcloud-bkp.sql"
+    creates: "{{nextcloud_backup_db}}"
   when: nextcloud_db_backend in ["mysql", "mariadb"] and nextcloud_db_backup
 
 - name: "[NC-Backup] - Backup PostgreSQL database"
@@ -21,17 +21,25 @@
     pg_dump {{nextcloud_db_name}}
     -h {{nextcloud_db_host}}
     -U {{nextcloud_db_admin}}
-    -f {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_nextcloud-bkp.sql
+    -f {{nextcloud_backup_db}}
   args:
-    creates: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_nextcloud-bkp.sql"
+    creates: "{{nextcloud_backup_db}}"
   when: nextcloud_db_backend == "pgsql" and nextcloud_db_backup
 
 - name: "[NC-Backup] - Backup config.php"
-  command: "cp {{nextcloud_webroot}}/config/config.php {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_config.php"
+  command: "cp {{nextcloud_webroot}}/config/config.php {{nextcloud_backup_config}}"
   args:
-    creates: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_config.php"
+    creates: "{{nextcloud_backup_config}}"
+
+- name: "[NC-Backup] - Verify backup."
+  stat: path="{{item}}"
+  register: _confsize
+  failed_when: _confsize.stat.size is undefined or _confsize.stat.size <= 10
+  with_items:
+    - {{nextcloud_backup_db}}
+    - {{nextcloud_backup_config}}
 
   # backup data folder only if in a sub-directory of nextcloud_webroot
 - name: "[NC-Backup] - Backup data folder"
-  command: "cp {{nextcloud_data_dir}} {{nextcloud_backup_dir}}/{{ansible_date_time.date}}_data"
+  command: "cp -r {{nextcloud_data_dir}} {{nextcloud_backup_data}}"
   when: "'{{nextcloud_webroot}}' in '{{nextcloud_data_dir}}'"

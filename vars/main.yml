@@ -13,3 +13,6 @@ nextcloud_dl_file:
   latest: "latest-{{nextcloud_branch}}.zip"
 nextcloud_full_url: "{{nextcloud_repository}}/{{nextcloud_dl_path[nextcloud_channel]}}/{{nextcloud_dl_file[nextcloud_channel]}}"
 
+nextcloud_backup_db: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_nextcloud-bkp.sql"
+nextcloud_backup_config: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_config.php"
+nextcloud_backup_data: "{{nextcloud_backup_dir}}/{{ansible_date_time.date}}_data"
