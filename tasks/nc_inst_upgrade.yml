@@ -1,8 +1,8 @@
 ---
 - name: "[NC-Upgrade] - Move the current nextcloud instance."
-  command: "mv {{ nextcloud_webroot }} {{ nextcloud_webroot }}_old"
+  command: "mv {{ nextcloud_webroot }} {{ nextcloud_webroot_old }}"
   args:
-    creates: "{{ nextcloud_webroot }}_old/version.php"
+    creates: "{{ nextcloud_webroot_old }}/version.php"
 
 - name: "[NC-Upgrade] - Copy the new version in {{nextcloud_webroot}}."
   command: "mv /tmp/nextcloud {{ nextcloud_webroot }}"
