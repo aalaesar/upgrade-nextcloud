@@ -19,3 +19,4 @@
     chdir: "{{nextcloud_webroot}}_old/apps/"
   when: "'{{item}}' not in nc_apps_new.stdout_lines"
   with_items: "{{nc_apps_old.stdout_lines}}"
+# FIXME: crash here when skipping the file. need improvment for idempotence
