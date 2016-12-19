@@ -33,24 +33,36 @@
     args:
       chdir: "{{ nextcloud_webroot }}"
 
-  - include: tasks/nc_backup.yml
+  - block:
+      - include: tasks/nc_backup.yml
+    rescue:
+      - name: "[NC-Rescue] - Remove nextcloud backup directory."
+        file: path={{nextcloud_backup_dir}} state=absent
+        failed_when: true
 
   - name: "[NC-Upgrade] - webserver is stopped"
     service: name={{nextcloud_websrv}} state=stopped
 
-  - include: tasks/nc_inst_upgrade.yml
-
+  - block:
+      - include: tasks/nc_inst_upgrade.yml
+    rescue:
+      - include: tasks/nc_rescue.yml
+      - fail: msg="Upgrade installation failed."
   - name: "[NC-Upgrade] - webserver is started"
     service: name={{nextcloud_websrv}} state=started
 
-  - name: "[NC-Upgrade] - Run occ upgrade."
-    become_user: "{{ websrv_user }}"
-    command: php occ upgrade
-    args:
-      chdir: "{{ nextcloud_webroot }}"
-    register: nc_upgrade_result
-
-  - debug: msg="{{nc_upgrade_result.stdout_lines}}"
+  - block:
+      - name: "[NC-Upgrade] - Run occ upgrade."
+        become_user: "{{ websrv_user }}"
+        command: php occ upgrade
+        args:
+          chdir: "{{ nextcloud_webroot }}"
+        register: nc_upgrade_result
+      - assert:
+          that: "'update your PHP version' not in nc_upgrade_result.stdout"
+    rescue:
+      - include: tasks/nc_rescue.yml
+      - fail: msg="{{nc_upgrade_result.stdout_lines}}"
 
   - name: "[NC-Upgrade] - Nextcloud is not in maintenance mode."
     become_user: "{{ websrv_user }}"
