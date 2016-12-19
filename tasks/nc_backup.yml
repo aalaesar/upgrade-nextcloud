@@ -36,8 +36,8 @@
   register: _confsize
   failed_when: _confsize.stat.size is undefined or _confsize.stat.size <= 10
   with_items:
-    - {{nextcloud_backup_db}}
-    - {{nextcloud_backup_config}}
+    - "{{nextcloud_backup_db}}"
+    - "{{nextcloud_backup_config}}"
 
   # backup data folder only if in a sub-directory of nextcloud_webroot
 - name: "[NC-Backup] - Backup data folder"
