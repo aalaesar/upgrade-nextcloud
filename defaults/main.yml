@@ -30,6 +30,7 @@ nextcloud_db_admin: "ncadmin"
 # [OPTIONS]
 nextcloud_restore_3rdparty_apps: true
 nextcloud_db_backup: true
+nextcloud_upgrade_clean: true
 
 # [SYSTEM]
 websrv_user: "www-data"

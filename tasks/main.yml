@@ -69,6 +69,8 @@
     command: php occ maintenance:mode --off
     args:
       chdir: "{{ nextcloud_webroot }}"
-  when: "{{check_version.rc}} == 0"
 
-- debug: msg="{{check_version.stdout}}"
+  - name: "[NC-Post-Upgrade]- Clean old nextcloud instance."
+    file: name="{{nextcloud_webroot_old}}" state=absent
+    when: nextcloud_upgrade_clean
+  when: "{{check_version.rc}} == 0"
