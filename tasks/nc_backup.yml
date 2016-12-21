@@ -1,8 +1,6 @@
 ---
 - name: "[NC-Backup] - Backup folder exists."
-  file:
-    path: "{{ nextcloud_backup_dir }}"
-    state: directory
+  file: path="{{ nextcloud_backup_dir }}" state=directory
 
 - name: "[NC-Backup] - Backup Mysql/MariaDb database."
   command: >
@@ -16,7 +14,7 @@
   when: nextcloud_db_backend in ["mysql", "mariadb"] and nextcloud_db_backup
 
 - name: "[NC-Backup] - Backup PostgreSQL database"
-  command: >
+  shell: >
     PGPASSWORD="{{nextcloud_db_pwd}}"
     pg_dump {{nextcloud_db_name}}
     -h {{nextcloud_db_host}}
