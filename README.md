@@ -57,6 +57,19 @@ The http server used by nextcloud. Available values are: **apache** or **nginx**
 nextcloud_webroot: "/opt/nextcloud"
 ```
 The Nextcloud root directory.
+```YAML
+nextcloud_data_dir: "/var/ncdata"
+```
+The Nextcloud data directory location.
+It is important to specify its location if it is located is the same directory as Nextcloud
+```YAML
+nextcloud_backup_dir: "{{nextcloud_webroot}}_bkp"
+```
+Directory where the nextcloud backup will be stored
+```YAML
+nextcloud_webroot_old: "{{nextcloud_webroot}}_old"
+```
+Directory where the previous nextcloud instance will be stored
 ### Database configuration
 ```YAML
 nextcloud_db_backup: true
@@ -84,11 +97,27 @@ The Nextcloud instance's database name.
 nextcloud_db_admin: "ncadmin"
 ```
 The Nextcloud instance's database user's login
+
 ```YAML
 nextcloud_db_pwd: false
 ```
 **The Nextcloud instance's database user's password --required!!--**
+
+### OPTIONS
+```YAML
+nextcloud_restore_3rdparty_apps: true
+```
+will copy the installed/downloaded apps in your new instance
+```YAML
+nextcloud_db_backup: true
+```
+Specify if the database backup is required during the upgrade
+```YAML
+nextcloud_upgrade_clean: true
+```
+Should the upgrade process remove the old Nextcloud instance files once upgraded successfully ?
 ### System configuration
+
 ```YAML
 websrv_user: "www-data"
 ```
