@@ -1,5 +1,5 @@
 #!/usr/bin/env php
-<?php declare(strict_types = 1);
+<?php
 /**
  * Verify nextcloud instance versions and return rc 0 if upgrade can be performed
  *
@@ -50,8 +50,8 @@ function loadAll(&$v)
 {
   require $v['file'];
 
-  loadVersion($v, $OC_Version ?? []);
-  loadUpgradeFrom($v, $OC_VersionCanBeUpgradedFrom ?? []);
+  loadVersion($v, $OC_Version);
+  loadUpgradeFrom($v, $OC_VersionCanBeUpgradedFrom);
 }
 
 /**
