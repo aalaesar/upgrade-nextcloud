@@ -13,18 +13,18 @@
 - block:
     - name: "[NC-Upgrade] - Compare versions installed/new"
       script: "files/nc_check_versions.sh {{nextcloud_webroot}} /tmp/nextcloud/"
-      register: check_version
+      register: nc_upgrade_check_versions
       changed_when: false
-      failed_when: "{{check_version.rc}} == 3"
+      failed_when: "{{nc_upgrade_check_versions.rc}} == 3"
 
-    - fail: msg="{{check_version.stdout}}"
-      when: "{{check_version.rc}} == 2"
+    - fail: msg="{{nc_upgrade_check_versions.stdout}}"
+      when: "{{nc_upgrade_check_versions.rc}} == 2"
 
   rescue:
     - name: "[NC-Upgrade] - Remove nextcloud archive files"
       file: path=/tmp/nextcloud state=absent
 
-    - fail: msg="{{check_version.stdout}}"
+    - fail: msg="{{nc_upgrade_check_versions.stdout}}"
 
 - block:
   - name: "[NC-Upgrade] - Nextcloud is in maintenance mode."
@@ -73,4 +73,4 @@
   - name: "[NC-Post-Upgrade]- Clean old nextcloud instance."
     file: name="{{nextcloud_webroot_old}}" state=absent
     when: nextcloud_upgrade_clean
-  when: "{{check_version.rc}} == 0"
+  when: "{{nc_upgrade_check_versions.rc}} == 0"

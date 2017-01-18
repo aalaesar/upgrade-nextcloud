@@ -31,8 +31,8 @@
 
 - name: "[NC-Backup] - Verify backup."
   stat: path="{{item}}"
-  register: _confsize
-  failed_when: _confsize.stat.size is undefined or _confsize.stat.size <= 10
+  register: nc_backup_confsize
+  failed_when: nc_backup_confsize.stat.size is undefined or nc_backup_confsize.stat.size <= 10
   with_items:
     - "{{nextcloud_backup_db}}"
     - "{{nextcloud_backup_config}}"

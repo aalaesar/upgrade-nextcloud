@@ -28,14 +28,14 @@
 
   - name: "[NC] - Ensure Nextcloud directories are 0750"
     command: find {{ nextcloud_data_dir }} -type d -exec chmod -c 0750 {} \;
-    register: chmod_result
-    changed_when: "chmod_result.stdout != \"\""
+    register: nc_upgrade_chmod_result
+    changed_when: "nc_upgrade_chmod_result.stdout != \"\""
     ignore_errors: true
 
   - name: "[NC] - Ensure Nextcloud files are 0640"
     command: find {{ nextcloud_data_dir }} -type f -exec chmod -c 0640 {} \;
-    register: chmod_result
-    changed_when: "chmod_result.stdout != \"\""
+    register: nc_upgrade_chmod_result
+    changed_when: "nc_upgrade_chmod_result.stdout != \"\""
     ignore_errors: true
   when: "'{{nextcloud_webroot}}' in '{{nextcloud_data_dir}}'"
 
