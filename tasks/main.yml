@@ -12,7 +12,7 @@
 
 - block:
     - name: "[NC-Upgrade] - Compare versions installed/new"
-      script: "files/nc_check_versions.sh {{nextcloud_webroot}} /tmp/nextcloud/"
+      script: "files/nc_check_versions.php {{nextcloud_webroot}} /tmp/nextcloud/"
       register: nc_upgrade_check_versions
       changed_when: false
       failed_when: "{{nc_upgrade_check_versions.rc}} == 3"
