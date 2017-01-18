@@ -33,5 +33,5 @@ nextcloud_db_backup: true
 nextcloud_upgrade_clean: true
 
 # [SYSTEM]
-websrv_user: "www-data"
-websrv_group: "www-data"
+nextcloud_websrv_user: "www-data"
+nextcloud_websrv_group: "www-data"

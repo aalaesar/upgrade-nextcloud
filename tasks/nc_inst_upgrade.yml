@@ -23,8 +23,8 @@
       mode: u=rwX,g=rX,o-rwx
       recurse: yes
       state: directory
-      owner: "{{ websrv_user }}"
-      group: "{{ websrv_group }}"
+      owner: "{{ nextcloud_websrv_user }}"
+      group: "{{ nextcloud_websrv_group }}"
 
   - name: "[NC] - Ensure Nextcloud directories are 0750"
     command: find {{ nextcloud_data_dir }} -type d -exec chmod -c 0750 {} \;
@@ -47,15 +47,15 @@
     path: "{{ nextcloud_webroot }}"
     state: directory
     recurse: yes
-    owner: "{{ websrv_user }}"
-    group: "{{ websrv_group }}"
+    owner: "{{ nextcloud_websrv_user }}"
+    group: "{{ nextcloud_websrv_group }}"
 
 - name: "[NC] - Setting stronger directory ownership"
   file:
     path: "{{ nextcloud_webroot }}/{{ item }}/"
     recurse: yes
-    owner: "{{ websrv_user }}"
-    group: "{{ websrv_group }}"
+    owner: "{{ nextcloud_websrv_user }}"
+    group: "{{ nextcloud_websrv_group }}"
     state: directory
   with_items:
     - apps

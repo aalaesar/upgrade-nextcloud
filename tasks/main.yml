@@ -28,7 +28,7 @@
 
 - block:
   - name: "[NC-Upgrade] - Nextcloud is in maintenance mode."
-    become_user: "{{ websrv_user }}"
+    become_user: "{{ nextcloud_websrv_user }}"
     command: php occ maintenance:mode --on
     args:
       chdir: "{{ nextcloud_webroot }}"
@@ -53,7 +53,7 @@
 
   - block:
       - name: "[NC-Upgrade] - Run occ upgrade."
-        become_user: "{{ websrv_user }}"
+        become_user: "{{ nextcloud_websrv_user }}"
         command: php occ upgrade
         args:
           chdir: "{{ nextcloud_webroot }}"
@@ -65,7 +65,7 @@
       - fail: msg="{{nc_upgrade_result.stdout_lines}}"
 
   - name: "[NC-Upgrade] - Nextcloud is not in maintenance mode."
-    become_user: "{{ websrv_user }}"
+    become_user: "{{ nextcloud_websrv_user }}"
     command: php occ maintenance:mode --off
     args:
       chdir: "{{ nextcloud_webroot }}"
