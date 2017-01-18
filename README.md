@@ -119,11 +119,11 @@ Should the upgrade process remove the old Nextcloud instance files once upgraded
 ### System configuration
 
 ```YAML
-websrv_user: "www-data"
+nextcloud_websrv_user: "www-data"
 ```
 system user for the http server
 ```YAML
-websrv_group: "www-data"
+nextcloud_websrv_group: "www-data"
 ```
 system group for the http server
 
