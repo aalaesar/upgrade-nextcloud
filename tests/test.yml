@@ -2,7 +2,7 @@
 - hosts: localhost
   become: true
   become_user: root
-  roles:
-   - role: upgrade-nextcloud
-     nextcloud_db_backend: "pgsql"
-     nextcloud_db_pwd: "azerty"
+  roles: [../../]
+  vars:
+    nextcloud_db_backend: "pgsql"
+    nextcloud_db_pwd: "azerty"
