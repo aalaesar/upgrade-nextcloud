@@ -1,76 +1,92 @@
 ---
 # tasks file for upgrade-nextcloud
-- name: "[NC-Upgrade] - Unzip is installed"
-  package: name=unzip state=installed
 
-- name: "Download & extract new Nextcloud version to /tmp."
-  unarchive:
-    copy: no
-    src: "{{ nextcloud_full_url }}"
-    dest: "/tmp/"
-    creates: "/tmp/nextcloud/version.php"
+- name: "[NC-Upgrade] - Get current version."
+  become_user: "{{ nextcloud_websrv_user }}"
+  command: php occ status --output=json
+  args:
+    chdir: "{{ nextcloud_webroot }}"
+  register: nc_current_version
+  changed_when: false
 
-- block:
-    - name: "[NC-Upgrade] - Compare versions installed/new"
-      script: "files/nc_check_versions.php {{nextcloud_webroot}} /tmp/nextcloud"
-      register: nc_upgrade_check_versions
-      changed_when: false
-      failed_when: "{{nc_upgrade_check_versions.rc}} == 3"
-
-    - fail: msg="{{nc_upgrade_check_versions.stdout}}"
-      when: "{{nc_upgrade_check_versions.rc}} == 2"
-
-  rescue:
-    - name: "[NC-Upgrade] - Remove nextcloud archive files"
-      file: path=/tmp/nextcloud state=absent
-
-    - fail: msg="{{nc_upgrade_check_versions.stdout}}"
+- name: "[NC-Upgrade] - Check infos."
+  set_fact: nc_instance_status="{{nc_current_version.stdout|from_json}}"
+- assert:
+    that:  nc_instance_status.installed
 
 - block:
-  - name: "[NC-Upgrade] - Nextcloud is in maintenance mode."
-    become_user: "{{ nextcloud_websrv_user }}"
-    command: php occ maintenance:mode --on
-    args:
-      chdir: "{{ nextcloud_webroot }}"
+  - name: "[NC-Upgrade] - Unzip is installed"
+    package: name=unzip state=installed
+
+  - name: "Download & extract new Nextcloud version to /tmp."
+    unarchive:
+      copy: no
+      src: "{{ nextcloud_full_url }}"
+      dest: "/tmp/"
+      creates: "/tmp/nextcloud/version.php"
 
   - block:
-      - include: tasks/nc_backup.yml
-    rescue:
-      - name: "[NC-Rescue] - Remove nextcloud backup directory."
-        file: path={{nextcloud_backup_dir}} state=absent
-        failed_when: true
+      - name: "[NC-Upgrade] - Compare versions installed/new"
+        script: "files/nc_check_versions.php {{nextcloud_webroot}} /tmp/nextcloud"
+        register: nc_upgrade_check_versions
+        changed_when: false
+        failed_when: "{{nc_upgrade_check_versions.rc}} == 3"
 
-  - name: "[NC-Upgrade] - webserver is stopped"
-    service: name={{nextcloud_websrv}} state=stopped
+      - fail: msg="{{nc_upgrade_check_versions.stdout}}"
+        when: "{{nc_upgrade_check_versions.rc}} == 2"
+
+    rescue:
+      - name: "[NC-Upgrade] - Remove nextcloud archive files"
+        file: path=/tmp/nextcloud state=absent
+
+      - fail: msg="{{nc_upgrade_check_versions.stdout}}"
 
   - block:
-      - include: tasks/nc_inst_upgrade.yml
-    rescue:
-      - include: tasks/nc_rescue.yml
-      - fail: msg="Upgrade installation failed."
-  - name: "[NC-Upgrade] - webserver is started"
-    service: name={{nextcloud_websrv}} state=started
+    - name: "[NC-Upgrade] - Nextcloud is in maintenance mode."
+      become_user: "{{ nextcloud_websrv_user }}"
+      command: php occ maintenance:mode --on
+      args:
+        chdir: "{{ nextcloud_webroot }}"
 
-  - block:
-      - name: "[NC-Upgrade] - Run occ upgrade."
-        become_user: "{{ nextcloud_websrv_user }}"
-        command: php occ upgrade
-        args:
-          chdir: "{{ nextcloud_webroot }}"
-        register: nc_upgrade_result
-      - assert:
-          that: "'update your PHP version' not in nc_upgrade_result.stdout"
-    rescue:
-      - include: tasks/nc_rescue.yml
-      - fail: msg="{{nc_upgrade_result.stdout_lines}}"
+    - block:
+        - include: tasks/nc_backup.yml
+      rescue:
+        - name: "[NC-Rescue] - Remove nextcloud backup directory."
+          file: path={{nextcloud_backup_dir}} state=absent
+          failed_when: true
 
-  - name: "[NC-Upgrade] - Nextcloud is not in maintenance mode."
-    become_user: "{{ nextcloud_websrv_user }}"
-    command: php occ maintenance:mode --off
-    args:
-      chdir: "{{ nextcloud_webroot }}"
+    - name: "[NC-Upgrade] - webserver is stopped"
+      service: name={{nextcloud_websrv}} state=stopped
 
-  - name: "[NC-Post-Upgrade]- Clean old nextcloud instance."
-    file: name="{{nextcloud_webroot_old}}" state=absent
-    when: nextcloud_upgrade_clean
-  when: "{{nc_upgrade_check_versions.rc}} == 0"
+    - block:
+        - include: tasks/nc_inst_upgrade.yml
+      rescue:
+        - include: tasks/nc_rescue.yml
+        - fail: msg="Upgrade installation failed."
+    - name: "[NC-Upgrade] - webserver is started"
+      service: name={{nextcloud_websrv}} state=started
+
+    - block:
+        - name: "[NC-Upgrade] - Run occ upgrade."
+          become_user: "{{ nextcloud_websrv_user }}"
+          command: php occ upgrade
+          args:
+            chdir: "{{ nextcloud_webroot }}"
+          register: nc_upgrade_result
+        - assert:
+            that: "'update your PHP version' not in nc_upgrade_result.stdout"
+      rescue:
+        - include: tasks/nc_rescue.yml
+        - fail: msg="{{nc_upgrade_result.stdout_lines}}"
+
+    - name: "[NC-Upgrade] - Nextcloud is not in maintenance mode."
+      become_user: "{{ nextcloud_websrv_user }}"
+      command: php occ maintenance:mode --off
+      args:
+        chdir: "{{ nextcloud_webroot }}"
+
+    - name: "[NC-Post-Upgrade]- Clean old nextcloud instance."
+      file: name="{{nextcloud_webroot_old}}" state=absent
+      when: nextcloud_upgrade_clean
+    when: "{{nc_upgrade_check_versions.rc}} == 0"
+  when: not (nc_instance_status.versionstring == nextcloud_version)
