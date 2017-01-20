@@ -17,6 +17,6 @@
   command: cp -r {{item}} {{nextcloud_webroot}}/apps/
   args:
     chdir: "{{nextcloud_webroot}}_old/apps/"
-  when: "'{{item}}' not in nc_apps_new.stdout_lines"
+  when: (nc_apps_old.stdout_lines is defined) and (nc_apps_new.stdout_lines is defined) and (item not in nc_apps_new.stdout_lines)
   with_items: "{{nc_apps_old.stdout_lines}}"
 # FIXME: crash here when skipping the file. need improvment for idempotence
