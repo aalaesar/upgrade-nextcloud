@@ -5,4 +5,4 @@
   roles: [../../]
   vars:
     nextcloud_db_backend: "pgsql"
-    nextcloud_db_pwd: "azerty"
+    nextcloud_db_pwd: "secret"

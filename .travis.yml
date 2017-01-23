@@ -21,6 +21,12 @@ addons:
 before_install:
   # Install ansible
   - pip install -I "ansible==$ansible_version"
+  #install install_nextcloud not using ansible galaxy
+  - cd ..
+  - wget https://github.com/aalaesar/install_nextcloud/archive/v1.2.1.tar.gz
+  - tar -xzf v1.2.1.tar.gz
+  - ls
+  - cd -
 
 install:
 
@@ -30,7 +36,7 @@ install:
   # Create ansible.cfg with correct roles_path
   - printf '[defaults]\nroles_path=../' >ansible.cfg
   # Install install_Nexcloud
-  - ansible-galaxy install aalaesar.install_nextcloud
+  #- ansible-galaxy install aalaesar.install_nextcloud
   # Install Nexcloud 9
   - ansible-playbook tests/nc_init.yml -i tests/inventory
 
