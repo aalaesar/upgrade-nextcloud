@@ -41,6 +41,9 @@ install:
   - ansible-playbook tests/nc_init.yml -i tests/inventory
 
 script:
+  # Test update script
+  - php tests/nc_check_versions_test.php
+
   # Basic role syntax check
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
 

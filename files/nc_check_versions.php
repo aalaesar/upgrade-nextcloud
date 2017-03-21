@@ -77,7 +77,12 @@ function loadVersion(array &$v, array $version)
  */
 function loadUpgradeFrom(array &$v, array $version)
 {
-  $v['upgrade_from'] = implode('.', $version);
+  if (array_key_exists('nextcloud', $version)) {
+    $v['upgrade_from'] = min(array_keys(array_filter($version['nextcloud'])));
+  } else {
+    // Pre NC12 formatting.
+    $v['upgrade_from'] = implode('.', $version);
+  }
 }
 
 /**
