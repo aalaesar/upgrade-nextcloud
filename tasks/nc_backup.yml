@@ -36,6 +36,7 @@
   with_items:
     - "{{nextcloud_backup_db}}"
     - "{{nextcloud_backup_config}}"
+  when: item != "{{nextcloud_backup_db}}" or nextcloud_db_backup
 
   # backup data folder only if in a sub-directory of nextcloud_webroot
 - name: "[NC-Backup] - Backup data folder"
